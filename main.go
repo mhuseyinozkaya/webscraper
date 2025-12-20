@@ -64,9 +64,11 @@ func main() {
 		for _, n := range nodes {
 			href := n.AttributeValue("href")
 			href = strings.TrimSpace(href)
+			// Geçersiz olan href bağlantılarını atlama
 			if href == "" || strings.HasPrefix(href, "#") || strings.HasPrefix(href, "javascript:") {
 				continue
 			}
+			// domain + path yaparak geçerli bağlantı oluşturma
 			fixed := ConcatURL(url, href)
 			if fixed == "" {
 				continue
@@ -123,7 +125,9 @@ func ConcatURL(link string, href string) string {
 	return base.ResolveReference(path).String()
 }
 func ParseFilePath(url string, extension string) string {
-	filename := strings.Replace(url, "://", ".", 1)
+	filename := strings.ReplaceAll(url, "://", ".")
+	filename = strings.ReplaceAll(filename, ":", ".")
+	filename = strings.Trim(filename, "/")
 	filename = strings.ReplaceAll(filename, "/", ".")
 	return filename + extension
 }
@@ -133,17 +137,17 @@ func IsValidURL(rawurl string) bool {
 	u, err := url.Parse(rawurl)
 
 	if err != nil {
-		fmt.Printf("URL ayrıştırılamadı: %s", rawurl)
+		fmt.Printf("URL ayrıştırılamadı: %s\n", rawurl)
 		return false
 	}
 
 	if u.Scheme == "" || u.Host == "" {
-		fmt.Printf("Protokol veya host belirtilmedi: %s", rawurl)
+		fmt.Printf("Protokol veya host belirtilmedi: %s\n", rawurl)
 		return false
 	}
 
 	if u.Scheme != "http" && u.Scheme != "https" {
-		fmt.Printf("Belirtilen protokol HTTP değil: %s", rawurl)
+		fmt.Printf("Belirtilen protokol HTTP değil: %s\n", rawurl)
 		return false
 	}
 	return true
